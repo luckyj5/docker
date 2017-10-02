@@ -12,3 +12,8 @@ RUN apt-get update && apt-get install -y curl && \
     tar xfz /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz -C /opt && \
     rm /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz
 
+COPY script.sh /
+RUN chmod +x script.sh
+EXPOSE 2181
+
+CMD ["/bin/sh", "-c", "/script.sh"]
