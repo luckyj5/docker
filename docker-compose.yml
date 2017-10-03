@@ -5,11 +5,11 @@ services:
     hostname: zookeeper
     ports:
       - "2181:2181"
-    restart: always
+    #restart: always
   kafka:
     image: luckyj5/kafka
     hostname: kafka
-    restart: always
+    #restart: always
     links:
       - zookeeper
   kafka-data-gen:
@@ -17,4 +17,25 @@ services:
     hostname: kafka-data-gen
     links:
       - kafka
-    restart: always
+    #restart: always
+    environment:
+    - KAFKA_MSG_COUNT=1000000
+    - KAFKA_MSG_SIZE=256
+    - KAFKA_TOPIC=perf
+    - KAFKA_BATCH_SIZE=16384
+    - KAFKA_BUFFER_MEMORY=33554432
+
+  kafka-conect-splunk-sink:
+    image: luckyj5/kafka-connect-splunk-sink
+    hostname: kafka-connect
+    links:
+      - kafka-data-gen
+    #restart: always
+    environment:
+    - SPLUNK_HEC_ENDPOINT=https://10.16.31.230:8088
+    - SPLUNK_HEC_TOKEN=842637D8-C86E-4915-8976-D6857B5407C1
+    - KAFKA_TOPIC=perf
+#- SPLUNK_HEC_ENDPOINT=https://heclb1:8088
+#- SPLUNK_HEC_TOKEN=00000000-0000-0000-0000-000000000000
+
+    
