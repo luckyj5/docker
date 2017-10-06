@@ -1,0 +1,39 @@
+zookeeper:
+  image: luckyj5/zookeeper
+  name: docker-zookeeper
+  hostname: zookeeper
+  restart: always
+
+kafka:
+  image: luckyj5/kafka
+  name: docker-kafka
+  hostname: kafka
+  restart: always
+  links:
+    - zookeeper
+
+kafka-data-gen:
+  image: luckyj5/kafka-data-gen
+  name: docker-kafka-data-gen
+  hostname: kafka-data-gen
+  links:
+    - kafka
+  restart: always
+  environment:
+    - KAFKA_MSG_COUNT=1000000
+    - KAFKA_MSG_SIZE=256
+    - KAFKA_TOPIC=perf
+    - KAFKA_BATCH_SIZE=16384
+    - KAFKA_BUFFER_MEMORY=33554432
+
+kafka-conect-splunk-sink:
+  image: luckyj5/kafka-connect-splunk-sink
+  name: docker-kafka-connect-splunk-sink
+  hostname: kafka-connect
+  links:
+    - kafka-data-gen
+  restart: always
+  environment:
+    - SPLUNK_HEC_ENDPOINT=https://heclb1:8088
+    - SPLUNK_HEC_TOKEN=00000000-0000-0000-0000-000000000000
+    - KAFKA_TOPIC=perf

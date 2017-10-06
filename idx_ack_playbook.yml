@@ -1,0 +1,47 @@
+---
+- hosts: orca_role_indexer
+  gather_facts: false
+  vars:
+      splunk:
+          user: splunk
+          home: /opt/splunk
+          exec: /opt/splunk/bin/splunk
+  tasks:
+  #First steps, we aren't guaranteed to have an etc/system/local directory, so we should create it
+  - name: Create etc/apps/splunk_httpinput/local directory
+    file: path={{splunk.home}}/etc/apps/splunk_httpinput/local state=directory mode=0755 recurse=yes owner={{splunk.user}}
+    become: yes
+    become_user: "{{splunk.user}}"
+ 
+  #The next step is to create the conf file we want to use, if it doesn't exist
+  - name: Check for inputs.conf
+    stat: path={{splunk.home}}/etc/apps/splunk_httpinput/local/inputs.conf
+    #NOTE: Change the variable this registers as for multiple conf files
+    register: conf_file
+    changed_when: False
+    become: yes
+    become_user: "{{splunk.user}}"
+ 
+  - name: Create server.conf
+    file: path={{splunk.home}}/etc/system/local/server.conf state=touch mode=0644 owner={{splunk.user}}
+    when: conf_file.stat.exists == False
+    become: yes
+    become_user: "{{splunk.user}}"
+ 
+  #Last step, we take our conf file and we add the parameter that we need
+  - name: Add the conf file parameter
+    ini_file: >
+      dest={{splunk.home}}/etc/apps/splunk_httpinput/local/inputs.conf
+      section=http://orca
+      option=useACK
+      value=1
+    become: yes
+    become_user: "{{splunk.user}}"
+
+  - name: Restart the splunkd service
+    command: "{{splunk.exec}} restart -f"
+    become: yes
+    become_user: "{{splunk.user}}"
+    environment:
+      HOME: "{{splunk.home}}"
+    ignore_errors: true  
