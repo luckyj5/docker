@@ -1,37 +1,49 @@
-version: "2"
+version: "3"
 services:
   zookeeper:
     image: luckyj5/zookeeper
     hostname: zookeeper
-    restart: always
+    ports: 
+      - "2181:2181"
+    restart: on-failure
 
   kafka:
     image: luckyj5/kafka
     hostname: kafka
-    restart: always
+    ports: 
+      - "9092:9092"
+    restart: on-failure
     links:
       - zookeeper
 
-  kafka-data-gen:
+  kafka-data-gen: 
     image: luckyj5/kafka-data-gen
     hostname: kafka-data-gen
     links:
       - kafka
-    restart: always
+    restart: on-failure
     environment:
-    - KAFKA_MSG_COUNT=1000000
+    - KAFKA_MSG_COUNT=10
     - KAFKA_MSG_SIZE=256
     - KAFKA_TOPIC=perf
     - KAFKA_BATCH_SIZE=16384
     - KAFKA_BUFFER_MEMORY=33554432
+    - KAFKA_EPS=20000
 
   kafka-conect-splunk-sink:
-    image: luckyj5/kafka-connect-splunk-sink
+    image: luckyj5/test-kcs-1
     hostname: kafka-connect
     links:
       - kafka-data-gen
-    restart: always
+    restart: on-failure
     environment:
-    - SPLUNK_HEC_ENDPOINT=https://<spluk-hec-endpoint>:8088
-    - SPLUNK_HEC_TOKEN=<splunk-hec-token>
-    - KAFKA_TOPIC=perf
+    - SPLUNK_HEC_ENDPOINT=<hec-host>
+    - SPLUNK_HEC_TOKEN=<hec-token>
+    - KAFKA_TOPIC=<kakfa_topic/s>
+    - CONNECTOR_NAME=<connector-name>
+    - MAX_TASKS=<no of tasks>
+    - SPLUNK_HEC_RAW=/truefalse
+    - SPLUNK_HEC_ACK_ENABLED=true/false
+    - SPLUNK_SOURCE=<source-value>
+    - SPLUNK_SOURCETYPE=<sourcetype-value>
+    - SPLUNK_INDEX=<index-value>
