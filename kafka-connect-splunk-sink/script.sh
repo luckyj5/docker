@@ -16,9 +16,9 @@ curl kafka-connect:8083/connectors -X POST -H "Content-Type: application/json" -
 		"splunk.hec.raw": "'"$SPLUNK_HEC_RAW"'",
 		"splunk.hec.ack.enabled": "'"$SPLUNK_HEC_ACK_ENABLED"'",
 		"splunk.hec.ssl.validate.certs": "false",
-    "splunk.indexes": "'"$SPLUNK_INDEX"'",
-    "splunk.sources": "'"$SPLUNK_SOURCE"'",
-    "splunk.sourcetypes": "'"$SPLUNK_SOURCETYPE"'",
+   		"splunk.indexes": "'"$SPLUNK_INDEX"'",
+    		"splunk.sources": "'"$SPLUNK_SOURCE"'",
+    		"splunk.sourcetypes": "'"$SPLUNK_SOURCETYPE"'",
 		"name": "kafka-connect-splunk"
 	}
 }'
