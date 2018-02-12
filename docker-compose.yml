@@ -15,6 +15,8 @@ services:
     restart: on-failure
     links:
       - zookeeper
+    environment:
+    - KAFKA_HEAP_OPTS=-Xmx4G -Xms1G  
 
   kafka-data-gen: 
     image: luckyj5/kafka-data-gen
@@ -23,23 +25,24 @@ services:
       - kafka
     restart: on-failure
     environment:
-    - KAFKA_MSG_COUNT=10
+    - KAFKA_MSG_COUNT=1000
     - KAFKA_MSG_SIZE=256
-    - KAFKA_TOPIC=perf
+    - KAFKA_TOPIC=test
     - KAFKA_BATCH_SIZE=16384
     - KAFKA_BUFFER_MEMORY=33554432
     - KAFKA_EPS=20000
 
   kafka-conect-splunk-sink:
-    image: luckyj5/test-kcs-1
+    image: luckyj5/kafka-connect-splunk
     hostname: kafka-connect
     links:
       - kafka-data-gen
     restart: on-failure
     environment:
+    - KAFKA_HEAP_OPTS=-Xmx4G -Xms1G
     - SPLUNK_HEC_ENDPOINT=<hec-host>
     - SPLUNK_HEC_TOKEN=<hec-token>
-    - KAFKA_TOPIC=<kakfa_topic/s>
+    - KAFKA_TOPIC=test
     - CONNECTOR_NAME=<connector-name>
     - MAX_TASKS=<no of tasks>
     - SPLUNK_HEC_RAW=/truefalse
